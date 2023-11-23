@@ -44,10 +44,22 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
 
     'rest_framework',
+    'rest_framework.authtoken',
+
+    'dj_rest_auth',
+    'dj_rest_auth.registration',
 
     'user',
+
+    "allauth",
+    "allauth.account",
+    'allauth.socialaccount',
+    "allauth.socialaccount.providers.google",
+    "allauth.socialaccount.providers.kakao",
+    'rest_framework_simplejwt',
 ]
 
 MIDDLEWARE = [
@@ -58,6 +70,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'santa_myojeong_be.urls'
@@ -151,3 +164,31 @@ REST_FRAMEWORK = {
 
 
 AUTH_USER_MODEL = 'user.User'
+
+SITE_ID = 1
+
+REST_AUTH = {
+    'USE_JWT' : True,
+    'JWT_AUTH_COOKIE' : 'access',
+    'JWT_AUTH_HTTPONLY': True,
+    'JWT_AUTH_REFRESH_COOKIE' : "refresh_token",
+    'JWT_AUTH_SAMESITE': 'Lax',
+    'JWT_AUTH_COOKIE_USE_CSRF' : False,
+    'SESSION_LOGIN' : False
+}
+
+from datetime import timedelta
+
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+
+REST_USE_JWT = True
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS': False,
+    'BLACKLIST_AFTER_ROTATION': True,
+}
