@@ -57,9 +57,9 @@ INSTALLED_APPS = [
     "allauth",
     "allauth.account",
     'allauth.socialaccount',
-    "allauth.socialaccount.providers.google",
     "allauth.socialaccount.providers.kakao",
     'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
 ]
 
 MIDDLEWARE = [
@@ -149,11 +149,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny'
+        'rest_framework.permissions.IsAuthenticated'
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
-        'rest_framework.authentication.SessionAuthentication'
+        'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
     ],
     'DEFAULT_PARSER_CLASSES': [
         'rest_framework.parsers.JSONParser',
@@ -166,6 +165,8 @@ REST_FRAMEWORK = {
 AUTH_USER_MODEL = 'user.User'
 
 SITE_ID = 1
+
+SOCIALACCOUNT_ADAPTER = 'user.adapters.KakaoAccountAdapter'
 
 REST_AUTH = {
     'USE_JWT' : True,
@@ -187,8 +188,14 @@ ACCOUNT_AUTHENTICATION_METHOD = 'email'
 REST_USE_JWT = True
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=60),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=365),
     'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': True,
 }
+
+
+kakao_secrets = secrets['KAKAO']
+
+KAKAO_REST_API_KEY = kakao_secrets['KAKAO_REST_API_KEY']
+KAKAO_CALLBACK_URI = kakao_secrets['KAKAO_CALLBACK_URI']

@@ -46,7 +46,7 @@ class User(AbstractUser):
     last_name = None
     email = models.EmailField(unique=True, max_length=255)
 
-    nickname = models.CharField(max_length=10)
+    nickname = models.CharField(null=True, max_length=10)
     gacha_ticket = models.PositiveIntegerField(default=0)
     view_count = models.PositiveIntegerField(default=0)
     rabbit = models.IntegerField(choices=RABBITS, default=1)
