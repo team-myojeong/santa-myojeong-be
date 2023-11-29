@@ -1,6 +1,7 @@
 from json.decoder import JSONDecodeError
 
 import requests
+from django.shortcuts import redirect
 from django.http import JsonResponse
 from rest_framework import status
 from rest_framework.views import APIView
@@ -15,6 +16,12 @@ from santa_myojeong_be.settings import KAKAO_REST_API_KEY, KAKAO_CALLBACK_URI
 
 
 BASE_URL = 'http://127.0.0.1:8000/'
+
+
+def login_test(request):
+    return redirect(
+        f"https://kauth.kakao.com/oauth/authorize?client_id={KAKAO_REST_API_KEY}&redirect_uri={KAKAO_CALLBACK_URI}&response_type=code"
+    )
 
 
 class UserAuthView(APIView):
