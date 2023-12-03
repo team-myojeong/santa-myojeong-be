@@ -4,4 +4,5 @@ from user import views
 urlpatterns = [
     path('login/', views.UserAuthView.as_view()),
     path('login/finish/', views.KakaoLoginView.as_view()),
+    path('question/', views.QuestionView.as_view()),
 ]
