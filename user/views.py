@@ -4,6 +4,7 @@ import requests
 from django.shortcuts import redirect
 from django.http import JsonResponse
 from rest_framework import status
+from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
 from dj_rest_auth.registration.views import SocialLoginView
@@ -12,6 +13,7 @@ from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from allauth.socialaccount.models import SocialAccount
 
 from user.models import User
+from user.serializers import QuestionSerializer
 from santa_myojeong_be.settings import KAKAO_REST_API_KEY, KAKAO_CALLBACK_URI
 
 
@@ -107,3 +109,17 @@ class KakaoLoginView(SocialLoginView):
     adapter_class = kakao_view.KakaoOAuth2Adapter
     client_class = OAuth2Client
     callback_url = KAKAO_CALLBACK_URI
+
+
+class QuestionView(APIView):
+    def get(self, request):
+        id_ = request.GET.get('id')
+
+        try:
+            requested_user = User.objects.get(id=id_)
+        except User.DoesNotExist:
+            return Response({'message': '존재하지 않는 유저입니다.'}, status=status.HTTP_404_NOT_FOUND)
+        
+        serialized_data = QuestionSerializer(requested_user).data
+
+        return Response(serialized_data, status=status.HTTP_200_OK)
