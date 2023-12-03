@@ -71,29 +71,32 @@ class UserAuthView(APIView):
                 return JsonResponse({'err_msg': 'no matching social type'}, status=status.HTTP_400_BAD_REQUEST)
             
             # 기존에 Kakao 가입된 유저
-            response = self._get_sign_in_response(access_token, code, 'failed to signin')
+            response = self._get_sign_in_response(access_token, code, False)
 
             return response
             
         except User.DoesNotExist:
             # 가입
-            response = self._get_sign_in_response(access_token, code, 'failed to signup')
+            response = self._get_sign_in_response(access_token, code, True)
 
             return response
         
-    def _get_sign_in_response(self, access_token: str, code: str, error_message: str):
+    def _get_sign_in_response(self, access_token: str, code: str, is_signup: bool):
         data = {'access_token': access_token, 'code': code}
         accept = requests.post(f"{BASE_URL}user/login/finish/", data=data)
         accept_status = accept.status_code
         if accept_status != 200:
-            return JsonResponse({'err_msg': error_message}, status=accept_status)
+            return JsonResponse({'err_msg': f"failed to {'signup' if is_signup else 'signin'}"}, status=accept_status)
         accept_json = accept.json()
 
         refresh_token = accept.headers['Set-Cookie'].split('refresh_token=')[-1].split(';')[0]
 
         COOKIE_MAX_AGE = 3600 * 24 * 14 # 14 days
 
-        response = {'access_token': accept_json['access']}
+        response = {
+            'access_token': accept_json['access'],
+            'is_signup': is_signup
+        }
         response_with_cookie = JsonResponse(response)
         response_with_cookie.set_cookie('refresh_token', refresh_token, max_age=COOKIE_MAX_AGE, httponly=True, samesite='Lax')
 
@@ -104,4 +107,3 @@ class KakaoLoginView(SocialLoginView):
     adapter_class = kakao_view.KakaoOAuth2Adapter
     client_class = OAuth2Client
     callback_url = KAKAO_CALLBACK_URI
-
