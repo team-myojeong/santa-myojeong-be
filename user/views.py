@@ -1,7 +1,4 @@
-from json.decoder import JSONDecodeError
-
 import requests
-from django.http import JsonResponse
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -32,24 +29,22 @@ class UserAuthView(APIView):
         return response
 
     def _get_token(self, code: str):
-        token_req = requests.get(f"https://kauth.kakao.com/oauth/token?grant_type=authorization_code&client_id={KAKAO_REST_API_KEY}&redirect_uri={KAKAO_CALLBACK_URI}&code={code}")
-        token_req_json = token_req.json()
-        error = token_req_json.get("error")
-        if error is not None:
-            raise JSONDecodeError(error)
+        toekn_request = requests.get(f'https://kauth.kakao.com/oauth/token?grant_type=authorization_code&client_id={KAKAO_REST_API_KEY}&redirect_uri={KAKAO_CALLBACK_URI}&code={code}')
+        toekn_request_json = toekn_request.json()
+        if toekn_request.status_code != 200:
+            return Response(toekn_request_json, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
-        access_token = token_req_json.get("access_token")
+        access_token = toekn_request_json.get('access_token')
 
         return access_token
     
     def _get_email(self, access_token: str):
-        profile_request = requests.get("https://kapi.kakao.com/v2/user/me", headers={"Authorization": f"Bearer {access_token}"})
-        profile_json = profile_request.json()
-        error = profile_json.get("error")
-        if error is not None:
-            raise JSONDecodeError(error)
+        profile_request = requests.get('https://kapi.kakao.com/v2/user/me', headers={'Authorization': f'Bearer {access_token}'})
+        profile_request_json = profile_request.json()
+        if profile_request.status_code != 200:
+            return Response(profile_request_json, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
-        kakao_account = profile_json.get('kakao_account')
+        kakao_account = profile_request_json.get('kakao_account')
         email = kakao_account.get('email')
 
         return email
@@ -61,9 +56,9 @@ class UserAuthView(APIView):
             # 다른 SNS로 가입된 유저
             social_user = SocialAccount.objects.get(user=user)
             if social_user is None:
-                return JsonResponse({'err_msg': 'email exists but not social user'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'message': 'email exists but not social user'}, status=status.HTTP_400_BAD_REQUEST)
             if social_user.provider != 'kakao':
-                return JsonResponse({'err_msg': 'no matching social type'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'message': 'no matching social type'}, status=status.HTTP_400_BAD_REQUEST)
             
             # 기존에 Kakao 가입된 유저
             response = self._get_sign_in_response(access_token, code, False)
@@ -78,10 +73,10 @@ class UserAuthView(APIView):
         
     def _get_sign_in_response(self, access_token: str, code: str, is_signup: bool):
         data = {'access_token': access_token, 'code': code}
-        accept = requests.post(f"{BASE_URL}user/login/finish/", data=data)
+        accept = requests.post(f'{BASE_URL}user/login/finish/', data=data)
         accept_status = accept.status_code
         if accept_status != 200:
-            return JsonResponse({'err_msg': f"failed to {'signup' if is_signup else 'signin'}"}, status=accept_status)
+            return Response({'message': f"failed to {'signup' if is_signup else 'signin'}"}, status=accept_status)
         accept_json = accept.json()
 
         refresh_token = accept.headers['Set-Cookie'].split('refresh_token=')[-1].split(';')[0]
@@ -92,7 +87,7 @@ class UserAuthView(APIView):
             'access_token': accept_json['access'],
             'is_signup': is_signup
         }
-        response_with_cookie = JsonResponse(response)
+        response_with_cookie = Response(response)
         response_with_cookie.set_cookie('refresh_token', refresh_token, max_age=COOKIE_MAX_AGE, httponly=True, samesite='Lax')
 
         return response_with_cookie
