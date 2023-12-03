@@ -51,6 +51,10 @@ class User(AbstractUser):
     view_count = models.PositiveIntegerField(default=0)
     rabbit = models.IntegerField(choices=RABBITS, default=1)
 
+    question1 = models.CharField(null=True, max_length=100)
+    question2 = models.CharField(null=True, max_length=100)
+    question3 = models.CharField(null=True, max_length=100)
+
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 
