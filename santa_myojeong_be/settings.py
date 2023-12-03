@@ -199,3 +199,21 @@ kakao_secrets = secrets['KAKAO']
 
 KAKAO_REST_API_KEY = kakao_secrets['KAKAO_REST_API_KEY']
 KAKAO_CALLBACK_URI = kakao_secrets['KAKAO_CALLBACK_URI']
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+        }
+    },
+    'loggers': {
+        'django.db.backends': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+    }
+}

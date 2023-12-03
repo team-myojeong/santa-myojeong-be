@@ -51,6 +51,10 @@ class User(AbstractUser):
     view_count = models.PositiveIntegerField(default=0)
     rabbit = models.IntegerField(choices=RABBITS, default=1)
 
+    question1 = models.CharField(null=True, max_length=100)
+    question2 = models.CharField(null=True, max_length=100)
+    question3 = models.CharField(null=True, max_length=100)
+
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 
@@ -64,3 +68,11 @@ class UserLike(models.Model):
     user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
     target_user = models.ForeignKey(User, related_name='target_user', on_delete=models.CASCADE)
     created_at = models.DateField(auto_now_add=True)
+
+
+class DefaultQuestion(models.Model):
+    question = models.CharField(max_length=100)
+    is_delete = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.question
