@@ -64,3 +64,11 @@ class UserLike(models.Model):
     user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
     target_user = models.ForeignKey(User, related_name='target_user', on_delete=models.CASCADE)
     created_at = models.DateField(auto_now_add=True)
+
+
+class DefaultQuestion(models.Model):
+    question = models.CharField(max_length=100)
+    is_delete = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.question
